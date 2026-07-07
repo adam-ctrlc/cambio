@@ -82,9 +82,9 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Command palette"
-                className="relative w-full max-w-lg glass rounded-2xl shadow-2xl overflow-hidden border border-white/10"
+                className="relative w-full max-w-lg glass rounded-2xl shadow-2xl border border-white/10 p-2"
             >
-                <div className="flex items-center gap-3 px-4 border-b border-white/10">
+                <div className="flex items-center gap-2 px-3 rounded-xl bg-white/5 border border-white/10">
                     <MagnifyingGlass className="w-5 h-5 text-gray-400 shrink-0" aria-hidden="true" />
                     <input
                         ref={inputRef}
@@ -96,11 +96,11 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
                         onKeyDown={onKeyDown}
                         placeholder="Jump to a page or currency…"
                         aria-label="Search pages and currencies"
-                        className="flex-1 bg-transparent text-white py-4 focus:outline-none focus-visible:[box-shadow:none] placeholder-gray-500"
+                        className="flex-1 bg-transparent text-white py-3 focus:outline-none focus-visible:[box-shadow:none] placeholder-gray-500"
                     />
                 </div>
 
-                <div role="listbox" aria-label="Results" className="max-h-[50vh] overflow-y-auto p-2">
+                <div role="listbox" aria-label="Results" className="max-h-[50vh] overflow-y-auto mt-2">
                     {filtered.length === 0 ? (
                         <p className="text-center text-gray-500 text-sm py-8">No matches.</p>
                     ) : (
@@ -111,7 +111,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
                                 role="option"
                                 aria-selected={i === active}
                                 onClick={it.onSelect}
-                                onMouseMove={() => setActive(i)}
+                                onMouseEnter={() => setActive(i)}
                                 className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left ${
                                     i === active ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-white/5'
                                 }`}

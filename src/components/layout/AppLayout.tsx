@@ -4,9 +4,9 @@ import { List, MagnifyingGlass } from '@phosphor-icons/react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ErrorState } from '@/components/layout/ErrorState';
 import { CommandPalette } from '@/components/CommandPalette';
+import { RouteSkeleton } from '@/components/layout/RouteSkeleton';
 import Footer from '@/components/Footer';
 import { Select } from '@/components/ui/Select';
-import DashboardSkeleton from '@/features/currency/components/DashboardSkeleton';
 import { useCurrencyContext } from '@/features/currency/useCurrencyContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useRouteFocus } from '@/hooks/useRouteFocus';
@@ -96,7 +96,7 @@ export default function AppLayout() {
                 </header>
 
                 <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 outline-none">
-                    {loadingFirst ? <DashboardSkeleton /> : <Outlet />}
+                    {loadingFirst ? <RouteSkeleton /> : <Outlet />}
                 </main>
 
                 <Footer />
