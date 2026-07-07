@@ -95,6 +95,12 @@ a {
   border-radius: 0.5rem;
 }
 
+/* Dialogs (e.g. the command palette) manage their own focus context, so their
+   inputs don't get the app-wide focus ring. */
+[role="dialog"] input:focus-visible {
+  box-shadow: none;
+}
+
 /* Native select + option theming (Windows/dark fix) */
 select {
   background-color: rgba(15, 22, 41, 0.6);

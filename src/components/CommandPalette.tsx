@@ -96,7 +96,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
                         onKeyDown={onKeyDown}
                         placeholder="Jump to a page or currency…"
                         aria-label="Search pages and currencies"
-                        className="flex-1 bg-transparent text-white py-3 focus:outline-none focus-visible:[box-shadow:none] placeholder-gray-500"
+                        className="flex-1 bg-transparent text-white py-3 focus:outline-none placeholder-gray-500"
                     />
                 </div>
 
