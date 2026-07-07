@@ -1,9 +1,29 @@
 import { useEffect, useState } from 'react';
-import { Globe, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import CurrencyBarChart from './CurrencyBarChart';
+import { Globe, TrendUp, TrendDown, ChartBar } from '@phosphor-icons/react';
+import type { Icon } from '@phosphor-icons/react';
+import CurrencyBarChart from '@/features/currency/components/CurrencyBarChart';
+import { useCurrencyContext } from '@/features/currency/useCurrencyContext';
 
-export default function Statistics({ rates, baseCurrency }) {
-    const [animatedStats, setAnimatedStats] = useState({
+interface AnimatedStats {
+    total: number;
+    highest: number;
+    lowest: number;
+    average: number;
+}
+
+interface Stat {
+    label: string;
+    value: number;
+    format: (val: number) => string;
+    icon: Icon;
+    color: string;
+    bg: string;
+    description: string;
+}
+
+export default function Statistics() {
+    const { rates, baseCurrency } = useCurrencyContext();
+    const [animatedStats, setAnimatedStats] = useState<AnimatedStats>({
         total: 0,
         highest: 0,
         lowest: 0,
@@ -44,65 +64,65 @@ export default function Statistics({ rates, baseCurrency }) {
         return () => clearInterval(timer);
     }, [rates]);
 
-    const stats = [
+    const stats: Stat[] = [
         {
             label: 'Total Currencies',
             value: animatedStats.total,
             format: (val) => val.toString(),
             icon: Globe,
             color: 'text-blue-400',
-            bg: 'bg-blue-500',
+            bg: 'bg-blue-500/15',
             description: `Available currencies`
         },
         {
             label: `Strongest Currency`,
             value: animatedStats.highest,
-            format: (val) => val.toFixed(4),
-            icon: TrendingUp,
+            format: (val) => val.toLocaleString(undefined, { maximumFractionDigits: 4 }),
+            icon: TrendUp,
             color: 'text-green-400',
-            bg: 'bg-green-500',
+            bg: 'bg-green-500/15',
             description: `Highest rate vs 1 ${baseCurrency}`
         },
         {
             label: `Weakest Currency`,
             value: animatedStats.lowest,
-            format: (val) => val.toFixed(4),
-            icon: TrendingDown,
+            format: (val) => val.toLocaleString(undefined, { maximumFractionDigits: 4 }),
+            icon: TrendDown,
             color: 'text-orange-400',
-            bg: 'bg-orange-500',
+            bg: 'bg-orange-500/15',
             description: `Lowest rate vs 1 ${baseCurrency}`
         },
         {
             label: `Average Rate`,
             value: animatedStats.average,
-            format: (val) => val.toFixed(4),
-            icon: BarChart3,
+            format: (val) => val.toLocaleString(undefined, { maximumFractionDigits: 4 }),
+            icon: ChartBar,
             color: 'text-purple-400',
-            bg: 'bg-purple-500',
+            bg: 'bg-purple-500/15',
             description: `Mean exchange rate`
         }
     ];
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {stats.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
                         <div
                             key={stat.label}
-                            className={`glass rounded-2xl p-6 hover:bg-white/5 transition-all animate-scale-in stagger-${index + 1}`}
+                            className={`glass card-hover rounded-2xl p-4 sm:p-5 animate-scale-in stagger-${index + 1}`}
                         >
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                    <p className="text-sm text-white mb-1">{stat.label}</p>
-                                    <p className="text-xs text-gray-200 mb-2">{stat.description}</p>
-                                    <p className="text-3xl font-bold text-white">
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs sm:text-sm text-gray-300 mb-1 truncate">{stat.label}</p>
+                                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white nums truncate">
                                         {stat.format(stat.value)}
                                     </p>
+                                    <p className="text-[11px] text-gray-500 mt-1 truncate">{stat.description}</p>
                                 </div>
-                                <div className={`${stat.bg} bg-opacity-20 p-3 rounded-xl backdrop-blur-sm`}>
-                                    <Icon className="w-6 h-6 text-white" />
+                                <div className={`${stat.bg} p-2.5 rounded-xl backdrop-blur-sm shrink-0 self-start`}>
+                                    <Icon className="w-5 h-5 text-white" aria-hidden="true" />
                                 </div>
                             </div>
                         </div>

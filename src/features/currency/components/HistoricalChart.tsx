@@ -1,9 +1,44 @@
 import { useState, useId, useMemo } from 'react';
-import { Loader2 } from 'lucide-react';
+import type { ChangeEvent } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useHistoricalRates, getLastNDays } from '../utils/api';
+import { useHistoricalRates } from '@/features/currency/api';
+import { getLastNDays } from '@/utils/date';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Select } from '@/components/ui/Select';
+import { useCurrencyContext } from '@/features/currency/useCurrencyContext';
 
-export default function HistoricalChart({ baseCurrency, currencies }) {
+interface ChartPoint {
+    date: string;
+    value: number;
+}
+
+interface ChartTooltipProps {
+    active?: boolean;
+    payload?: Array<{ value: number }>;
+    label?: string;
+    baseCurrency: string;
+    selectedCurrency: string;
+}
+
+function ChartTooltip({ active, payload, label, baseCurrency, selectedCurrency }: ChartTooltipProps) {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-[#111111] border border-blue-500/30 rounded-lg px-4 py-3 shadow-xl backdrop-blur-md">
+                <p className="text-xs text-gray-400 mb-1">{new Date(label!).toLocaleDateString(undefined, { dateStyle: 'medium' })}</p>
+                <p className="text-lg font-bold text-blue-400">
+                    {payload[0].value.toFixed(4)}
+                </p>
+                <p className="text-xs text-gray-500">
+                    1 {baseCurrency} = {payload[0].value.toFixed(4)} {selectedCurrency}
+                </p>
+            </div>
+        );
+    }
+    return null;
+}
+
+export default function HistoricalChart() {
+    const { baseCurrency, currencies } = useCurrencyContext();
     const [selectedCurrency, setSelectedCurrency] = useState('USD');
     const [days, setDays] = useState(30);
     const currencySelectId = useId();
@@ -11,34 +46,18 @@ export default function HistoricalChart({ baseCurrency, currencies }) {
     const { start, end } = useMemo(() => getLastNDays(days), [days]);
     const { data, isLoading: loading } = useHistoricalRates(start, end, baseCurrency, selectedCurrency);
 
-    const chartData = useMemo(() => {
+    const chartData = useMemo<ChartPoint[]>(() => {
         if (data && data.rates) {
             return Object.entries(data.rates)
                 .map(([date, rates]) => ({
                     date,
                     value: rates[selectedCurrency]
                 }))
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
+                .filter((point) => typeof point.value === 'number')
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         }
         return [];
     }, [data, selectedCurrency]);
-
-    const CustomTooltip = ({ active, payload, label }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-[#111111] border border-blue-500/30 rounded-lg px-4 py-3 shadow-xl backdrop-blur-md">
-                    <p className="text-xs text-gray-400 mb-1">{new Date(label).toLocaleDateString(undefined, { dateStyle: 'medium' })}</p>
-                    <p className="text-lg font-bold text-blue-400">
-                        {payload[0].value.toFixed(4)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                        1 {baseCurrency} = {payload[0].value.toFixed(4)} {selectedCurrency}
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
 
     const getStats = () => {
         if (!chartData.length) return { high: 0, low: 0, current: 0 };
@@ -54,15 +73,16 @@ export default function HistoricalChart({ baseCurrency, currencies }) {
 
     return (
         <div className="h-full">
-            <div className="glass rounded-2xl p-6 h-full flex flex-col">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">Historical Rates</h2>
-                    <div className="flex gap-2">
+            <div className="glass rounded-2xl p-5 sm:p-6 h-full flex flex-col">
+                <div className="flex flex-wrap items-center justify-end gap-3 mb-4">
+                    <div className="flex gap-2" role="group" aria-label="Chart range">
                         {[7, 30, 90].map((d) => (
                             <button
                                 key={d}
+                                type="button"
                                 onClick={() => setDays(d)}
-                                className={`px-3 py-1.5 rounded-lg text-sm transition-all border ${days === d
+                                aria-pressed={days === d}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${days === d
                                     ? 'bg-blue-600 text-white border-blue-600'
                                     : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/20 hover:bg-white/10'
                                     }`}
@@ -75,19 +95,18 @@ export default function HistoricalChart({ baseCurrency, currencies }) {
 
                 <div className="mb-6">
                     <label htmlFor={currencySelectId} className="block text-sm text-gray-400 mb-2">Select Currency</label>
-                    <select
+                    <Select
                         id={currencySelectId}
                         name="historicalCurrency"
                         value={selectedCurrency}
-                        onChange={(e) => setSelectedCurrency(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 text-white px-4 py-2.5 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all"
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedCurrency(e.target.value)}
                     >
                         {Object.keys(currencies).map((code) => (
-                            <option key={code} value={code} className="bg-[#1a1a1a]">
+                            <option key={code} value={code}>
                                 {code} - {currencies[code]}
                             </option>
                         ))}
-                    </select>
+                    </Select>
                     <p className="text-xs text-gray-500 mt-2">
                         {baseCurrency} to {selectedCurrency} over the last {days} days
                     </p>
@@ -95,9 +114,10 @@ export default function HistoricalChart({ baseCurrency, currencies }) {
 
                 <div className="w-full min-w-0 h-[300px]">
                     {loading ? (
-                        <div className="h-full flex flex-col items-center justify-center">
-                            <Loader2 className="w-16 h-16 text-blue-500 animate-spin" />
-                            <p className="text-gray-400 mt-4">Loading chart data...</p>
+                        <div className="h-full flex items-end gap-1.5" aria-busy="true" aria-label="Loading chart data…">
+                            {[38, 52, 45, 63, 58, 72, 66, 81, 74, 88, 79, 92].map((h, i) => (
+                                <Skeleton key={i} className="flex-1 rounded-md rounded-b-none" style={{ height: `${h}%` }} />
+                            ))}
                         </div>
                     ) : chartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -117,12 +137,12 @@ export default function HistoricalChart({ baseCurrency, currencies }) {
                                     domain={['auto', 'auto']}
                                     orientation="right"
                                     tick={{ fill: '#9ca3af', fontSize: 12 }}
-                                    tickFormatter={(val) => val.toFixed(4)}
+                                    tickFormatter={(val: number) => val.toFixed(4)}
                                     axisLine={false}
                                     tickLine={false}
                                     width={60}
                                 />
-                                <Tooltip content={<CustomTooltip />} />
+                                <Tooltip content={<ChartTooltip baseCurrency={baseCurrency} selectedCurrency={selectedCurrency} />} />
                                 <Area
                                     type="monotone"
                                     dataKey="value"
@@ -142,18 +162,18 @@ export default function HistoricalChart({ baseCurrency, currencies }) {
                 </div>
 
                 {chartData.length > 0 && (
-                    <div className="grid grid-cols-3 gap-4 mt-6">
-                        <div className="text-center p-4 rounded-xl bg-white/5 border border-white/5">
-                            <p className="text-sm text-gray-400 mb-1">High</p>
-                            <p className="text-2xl font-bold text-green-400">{stats.high.toFixed(4)}</p>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6">
+                        <div className="text-center p-2.5 sm:p-4 rounded-xl bg-white/5 border border-white/5">
+                            <p className="text-[11px] sm:text-sm text-gray-400 mb-1">High</p>
+                            <p className="text-base sm:text-2xl font-bold text-green-400 nums truncate">{stats.high.toFixed(4)}</p>
                         </div>
-                        <div className="text-center p-4 rounded-xl bg-white/5 border border-white/5">
-                            <p className="text-sm text-gray-400 mb-1">Current</p>
-                            <p className="text-2xl font-bold text-blue-400">{stats.current.toFixed(4)}</p>
+                        <div className="text-center p-2.5 sm:p-4 rounded-xl bg-white/5 border border-white/5">
+                            <p className="text-[11px] sm:text-sm text-gray-400 mb-1">Current</p>
+                            <p className="text-base sm:text-2xl font-bold text-blue-400 nums truncate">{stats.current.toFixed(4)}</p>
                         </div>
-                        <div className="text-center p-4 rounded-xl bg-white/5 border border-white/5">
-                            <p className="text-sm text-gray-400 mb-1">Low</p>
-                            <p className="text-2xl font-bold text-red-400">{stats.low.toFixed(4)}</p>
+                        <div className="text-center p-2.5 sm:p-4 rounded-xl bg-white/5 border border-white/5">
+                            <p className="text-[11px] sm:text-sm text-gray-400 mb-1">Low</p>
+                            <p className="text-base sm:text-2xl font-bold text-red-400 nums truncate">{stats.low.toFixed(4)}</p>
                         </div>
                     </div>
                 )}

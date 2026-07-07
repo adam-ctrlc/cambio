@@ -1,4 +1,4 @@
-import { TrendingUp, ExternalLink, Check } from 'lucide-react';
+import { TrendUp, ArrowSquareOut, Check } from '@phosphor-icons/react';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -11,9 +11,9 @@ export default function Footer() {
                     <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-2">
                             <div className="bg-blue-600/20 p-2 rounded-lg border border-blue-500/20">
-                                <TrendingUp className="w-5 h-5 text-blue-400" />
+                                <TrendUp className="w-5 h-5 text-blue-400" aria-hidden="true" />
                             </div>
-                            <span className="text-xl font-bold text-white">Exchange Rates</span>
+                            <span className="text-xl font-bold text-white" translate="no">Cambio</span>
                         </div>
                         <p className="text-sm text-gray-400">
                             Real-time currency exchange rates powered by institutional sources.
@@ -30,7 +30,7 @@ export default function Footer() {
                             className="flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors group"
                         >
                             <span>Frankfurter API</span>
-                            <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                            <ArrowSquareOut className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
                         </a>
                         <p className="text-xs text-gray-500">
                             Free, open-source currency data API tracking reference exchange rates from the European Central Bank.
@@ -41,10 +41,10 @@ export default function Footer() {
                     <div className="flex flex-col gap-3">
                         <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Information</h3>
                         <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" /> Real-time exchange rates</li>
-                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" /> Historical data & charts</li>
-                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" /> Currency converter</li>
-                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" /> 30+ currencies supported</li>
+                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" aria-hidden="true" /> Real-time exchange rates</li>
+                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" aria-hidden="true" /> Historical data & charts</li>
+                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" aria-hidden="true" /> Currency converter</li>
+                            <li><Check className="w-4 h-4 inline-block mr-1 text-blue-500" aria-hidden="true" /> 30+ currencies supported</li>
                         </ul>
                     </div>
                 </div>
@@ -52,7 +52,7 @@ export default function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-white/10">
                     <p className="text-sm text-gray-400 text-center">
-                        © {currentYear} Exchange Rates. All rights reserved.
+                        &copy; {currentYear} Cambio. All rights reserved.
                     </p>
                 </div>
             </div>
